@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from app.models.schemas import FolderCreate, DocumentRead
+from app.models.schemas import FolderCreate, DocumentRead, FolderRead
 from app.database.db import get_db
 from app.models.database_models import Folder, Document
 from typing import List
@@ -8,7 +8,7 @@ import os
 
 router = APIRouter()
 
-@router.get("/folders", response_model=List[FolderCreate])
+@router.get("/folders", response_model=List[FolderRead])
 async def list_folders(db: Session = Depends(get_db)):
     """Liste tous les dossiers"""
     return db.query(Folder).all()
