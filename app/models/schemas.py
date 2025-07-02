@@ -15,6 +15,7 @@ class FolderRead(FolderBase):
 
     class Config:
         orm_mode = True
+        from_attributes = True
 
 class DocumentBase(BaseModel):
     folder_id: int
@@ -34,4 +35,5 @@ class DocumentRead(DocumentBase):
     processed_at: Optional[datetime] = None
 
     class Config:
-        orm_mode = True 
+        orm_mode = True
+        from_attributes = True 

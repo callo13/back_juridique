@@ -1,6 +1,7 @@
 import ollama
 import chromadb
 from typing import List, Dict, Any
+import numpy as np
 
 class VectorizationService:
     def __init__(self):
@@ -19,10 +20,13 @@ class VectorizationService:
 
     async def store_vectors(self, texts: List[str], metadatas: List[dict[str, str | int | float | bool | None]]) -> List[str]:
         ids = [f"doc_{meta['document_id']}_chunk_{meta['chunk_index']}" for meta in metadatas]
+        embeddings = await self.create_embeddings(texts)
+        embeddings_np = np.array(embeddings, dtype=np.float32)
         self.collection.add(
             documents=texts,
             metadatas=metadatas,  # type: ignore
-            ids=ids
+            ids=ids,
+            embeddings=embeddings_np
         )
         return ids
 
