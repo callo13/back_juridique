@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from app.models.schemas import FolderCreate
+from app.models.schemas import FolderCreate, DocumentRead
 from app.database.db import get_db
-from app.models.database_models import Folder
+from app.models.database_models import Folder, Document
 from typing import List
 
 router = APIRouter()
@@ -29,4 +29,10 @@ async def delete_folder(folder_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Folder not found")
     db.delete(folder)
     db.commit()
-    return {"ok": True} 
+    return {"ok": True}
+
+@router.get("/folders/{folder_id}/documents", response_model=List[DocumentRead])
+async def get_documents_by_folder(folder_id: int, db: Session = Depends(get_db)):
+    """Récupère tous les documents d'un dossier donné."""
+    documents = db.query(Document).filter(Document.folder_id == folder_id).all()
+    return documents 
