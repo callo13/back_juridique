@@ -41,6 +41,11 @@ async def vectorize_document(
         db.commit()
         db.refresh(folder)
 
+    # Vérifier si le document existe déjà dans le dossier
+    existing_doc = db.query(Document).filter(Document.folder_id == folder.id, Document.filename == file.filename).first()
+    if existing_doc:
+        raise HTTPException(status_code=400, detail="Un document avec ce nom existe déjà dans ce dossier.")
+
     # 3. Créer l'entrée en BDD
     document = Document(
         folder_id=folder.id,
