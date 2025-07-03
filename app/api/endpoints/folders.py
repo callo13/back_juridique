@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from app.models.schemas import FolderCreate, DocumentRead, FolderRead
+from app.models.schemas import FolderCreate, DocumentRead, FolderRead, DocumentCreate
 from app.database.db import get_db
 from app.models.database_models import Folder, Document
 from typing import List
@@ -58,4 +58,43 @@ async def delete_document(document_id: int, db: Session = Depends(get_db)):
             pass
     db.delete(document)
     db.commit()
-    return {"ok": True} 
+    return {"ok": True}
+
+@router.get("/folders/{folder_id}", response_model=FolderRead)
+async def get_folder(folder_id: int, db: Session = Depends(get_db)):
+    """Récupère un dossier par son id."""
+    folder = db.query(Folder).filter(Folder.id == folder_id).first()
+    if not folder:
+        raise HTTPException(status_code=404, detail="Folder not found")
+    return folder
+
+@router.put("/folders/{folder_id}", response_model=FolderRead)
+async def update_folder(folder_id: int, folder_update: FolderCreate, db: Session = Depends(get_db)):
+    """Met à jour un dossier."""
+    folder = db.query(Folder).filter(Folder.id == folder_id).first()
+    if not folder:
+        raise HTTPException(status_code=404, detail="Folder not found")
+    setattr(folder, 'name', folder_update.name)
+    db.commit()
+    db.refresh(folder)
+    return folder
+
+@router.get("/documents/{document_id}", response_model=DocumentRead)
+async def get_document(document_id: int, db: Session = Depends(get_db)):
+    """Récupère un document par son id."""
+    document = db.query(Document).filter(Document.id == document_id).first()
+    if not document:
+        raise HTTPException(status_code=404, detail="Document not found")
+    return document
+
+@router.put("/documents/{document_id}", response_model=DocumentRead)
+async def update_document(document_id: int, document_update: DocumentCreate, db: Session = Depends(get_db)):
+    """Met à jour un document."""
+    document = db.query(Document).filter(Document.id == document_id).first()
+    if not document:
+        raise HTTPException(status_code=404, detail="Document not found")
+    for field, value in document_update.dict(exclude_unset=True).items():
+        setattr(document, field, value)
+    db.commit()
+    db.refresh(document)
+    return document 
