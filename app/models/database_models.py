@@ -1,6 +1,8 @@
 from sqlalchemy import Column, Integer, String, DateTime, func, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
+from app.services.vectorization import VectorizationService
+from sqlalchemy import event
 
 Base = declarative_base()
 
@@ -24,4 +26,15 @@ class Document(Base):
     processing_status = Column(String, default="pending")
     created_at = Column(DateTime, server_default=func.now())
     processed_at = Column(DateTime)
-    folder = relationship("Folder", back_populates="documents") 
+    folder = relationship("Folder", back_populates="documents")
+
+# Hook pour supprimer les vecteurs ChromaDB lors de la suppression d'un document
+@event.listens_for(Document, "after_delete")
+def delete_document_vectors(mapper, connection, target):
+    try:
+        doc_id = getattr(target, 'id', None)
+        if doc_id is not None:
+            vector_service = VectorizationService()
+            vector_service.delete_vectors_by_document_id(int(doc_id))
+    except Exception:
+        pass 

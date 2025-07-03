@@ -41,4 +41,11 @@ class VectorizationService:
             for i, chunk in enumerate(chunks)
         ]
         await self.store_vectors(chunks, metadatas)
-        return True 
+        return True
+
+    def delete_vectors_by_document_id(self, document_id: int):
+        # Récupère tous les ids des chunks liés à ce document
+        results = self.collection.get(where={"document_id": document_id})
+        ids_to_delete = results.get("ids", [])
+        if ids_to_delete:
+            self.collection.delete(ids=ids_to_delete) 
