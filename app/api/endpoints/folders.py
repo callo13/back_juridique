@@ -5,6 +5,7 @@ from app.database.db import get_db
 from app.models.database_models import Folder, Document
 from typing import List
 import os
+from sqlalchemy import event
 
 router = APIRouter()
 
@@ -97,4 +98,13 @@ async def update_document(document_id: int, document_update: DocumentCreate, db:
         setattr(document, field, value)
     db.commit()
     db.refresh(document)
-    return document 
+    return document
+
+@event.listens_for(Document, "after_delete")
+def delete_document_file(mapper, connection, target):
+    file_path = getattr(target, 'file_path', None)
+    if file_path and isinstance(file_path, str) and os.path.exists(file_path):
+        try:
+            os.remove(file_path)
+        except Exception:
+            pass 
