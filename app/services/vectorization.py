@@ -48,4 +48,4 @@ class VectorizationService:
         results = self.collection.get(where={"document_id": document_id})
         ids_to_delete = results.get("ids", [])
         if ids_to_delete:
-            self.collection.delete(ids=ids_to_delete) 
+            self.collection.delete(ids=ids_to_delete)

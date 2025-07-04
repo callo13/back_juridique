@@ -1,7 +1,7 @@
 import  ollama
 
 class LLMService:
-    def __init__(self, model_name: str = "tinyllama"):
+    def __init__(self, model_name: str = "mistral:7b"):
         self.model_name = model_name
 
     async def generate_answer(self, question: str, context: str) -> str:

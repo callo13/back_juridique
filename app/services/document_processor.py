@@ -33,12 +33,19 @@ class DocumentProcessor:
         with open(file_path, 'r', encoding='utf-8') as f:
             return f.read()
 
+    def clean_chunk(self, text: str) -> str:
+        # Supprime les lignes vides et remplace les multiples \n par un espace
+        return ' '.join(line.strip() for line in text.splitlines() if line.strip())
+
     async def chunk_text(self, text: str, chunk_size: int = 1000, overlap: int = 200) -> List[str]:
         chunks = []
         start = 0
         while start < len(text):
             end = min(start + chunk_size, len(text))
-            chunks.append(text[start:end])
+            raw_chunk = text[start:end]
+            cleaned = self.clean_chunk(raw_chunk)
+            if cleaned:
+                chunks.append(cleaned)
             start += chunk_size - overlap
         return chunks
 
